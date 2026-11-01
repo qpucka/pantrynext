@@ -53,7 +53,7 @@ Create a Supabase personal access token with access for the Supabase Terraform p
 
 - `SUPABASE_ACCESS_TOKEN`
 
-The Terraform bootstrap retrieves the new project’s server-side API key through the Supabase Management API using `SUPABASE_ACCESS_TOKEN`; no separate project-specific service-role secret is required.
+`01-worker-deploy` retrieves the current Supabase service role key through the Supabase Management API using `SUPABASE_ACCESS_TOKEN` and refreshes the Cloudflare Secrets Store secret; no separate project-specific service-role secret is required.
 
 Choose the initial Platform Owner credentials and add them as:
 

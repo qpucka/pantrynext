@@ -20,9 +20,10 @@ Postgres is the source of truth. Durable Objects provide tenant-scoped realtime 
 - **Cloudflare Workers:** application runtime and static asset delivery.
 - **Wrangler:** application bundling, version upload, and version deployment.
 - **Cloudflare Hyperdrive:** Worker-to-Postgres connectivity.
+- **Cloudflare Secrets Store:** server-side Supabase service role key storage for protected Worker operations.
 - **Cloudflare Durable Objects:** organization-scoped WebSocket notification rooms.
 - **Supabase:** Postgres database, Auth API, and project management.
-- **Terraform:** Supabase project, initial database bootstrap execution, Hyperdrive, Worker, initial Worker version, bindings, and first Durable Object migration.
+- **Terraform:** Supabase project, initial database bootstrap execution, Hyperdrive, Worker, Secrets Store placeholder and binding metadata, and infrastructure outputs.
 - **GitHub Actions:** Terraform provisioning and later application deployments.
 - **Node.js 26:** CI and local Worker test runtime.
 - **TypeScript:** Strictly type-checked Worker application and test code.
@@ -59,7 +60,7 @@ These scripts are bootstrap configuration, not migration history. Terraform exec
 ### `infra/terraform/`
 
 - `supabase.tf`: Supabase project, bootstrap SQL execution, API-key outputs, and project outputs.
-- `cloudflare.tf`: Hyperdrive, Worker, initial Worker version, bindings, Durable Object migration, and Worker outputs.
+- `cloudflare.tf`: Hyperdrive, Worker, Secrets Store placeholder, and infrastructure outputs.
 - `state.tf`: Terraform state in Cloudflare R2 through the S3-compatible backend.
 - `variables.tf`: environment-provided identifiers and passwords.
 - `versions.tf`: Terraform and provider constraints.
@@ -72,8 +73,7 @@ The `00-terraform-apply` workflow performs one dependency-ordered apply:
 2. Run the initial setup SQL.
 3. Create Hyperdrive using `cloudflare_hyperdrive_role`.
 4. Create the Worker.
-5. Upload and deploy the initial Worker version with Hyperdrive and `ORG_REALTIME` bindings.
-6. Apply the initial `OrganizationRealtimeRoom` Durable Object migration.
+5. Create the Secrets Store placeholder and Worker infrastructure. Wrangler deploys the application version and Durable Object migration.
 
 The Hyperdrive ID is kept in Terraform state. It is not copied to R2 as a separate artifact.
 
@@ -85,10 +85,10 @@ The `01-worker-deploy` workflow:
 2. Builds `apps/web` with `npm ci` and `npm run build`.
 3. Installs `apps/worker` dependencies with `npm ci`.
 4. Runs the strict Worker typecheck and TypeScript test suite.
-5. Reads the Worker name and Supabase public settings from Terraform state.
-6. Uses `wrangler versions upload` to upload the application code.
-7. Relies on Wrangler’s strict binding inheritance to preserve the existing Hyperdrive binding without knowing its ID.
-8. Uses `wrangler versions deploy` to route 100% of traffic to the uploaded version.
+5. Reads the Worker name, Hyperdrive ID, Secrets Store IDs, and Supabase public settings from Terraform state.
+6. Retrieves the current Supabase service role key with `SUPABASE_ACCESS_TOKEN` and updates the existing Cloudflare Secrets Store secret.
+7. Renders the Hyperdrive and Secrets Store bindings into a temporary Wrangler configuration.
+8. Uses `wrangler deploy` to deploy the application code.
 
 Worker tests run with Node 26’s native TypeScript type-stripping through `npm test`. The Worker package typechecks both `src/**/*.ts` and `test/**/*.ts` with strict TypeScript checking.
 

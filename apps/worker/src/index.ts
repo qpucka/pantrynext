@@ -9,6 +9,7 @@ export interface WorkerEnv {
   HYPERDRIVE?: { connectionString: string };
   SUPABASE_URL?: string;
   SUPABASE_PUBLISHABLE_KEY?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: { get(): Promise<string> };
   ORG_REALTIME?: RealtimeNamespace;
   ASSETS: { fetch(request: Request): Promise<Response> };
 }

@@ -4,6 +4,13 @@
   "compatibility_date": "2026-10-24",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "secrets_store_secrets": [
+    {
+      "binding": "SUPABASE_SERVICE_ROLE_KEY",
+      "store_id": "${SECRETS_STORE_ID}",
+      "secret_name": "SUPABASE_SERVICE_ROLE_KEY"
+    }
+  ],
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
