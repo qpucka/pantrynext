@@ -48,12 +48,11 @@ Create one Secrets Store, then create a secret with:
 - Scope: `workers`
 - Initial value: `TEMP`
 
-Record the store ID and secret ID. Add them as variables in the GitHub Actions environment named `terraform`:
+Record the store ID and add it as a variable in the GitHub Actions environment named `terraform`:
 
 - `CLOUDFLARE_SECRETS_STORE_ID`
-- `CLOUDFLARE_SERVICE_ROLE_SECRET_ID`
 
-The initial `TEMP` value only allows the secret to be created. Every `01-worker-deploy` run retrieves the current Supabase service-role key through the Supabase Management API and replaces the value before deploying the Worker.
+The deployment workflow discovers the secret ID by finding `SUPABASE_SERVICE_ROLE_KEY` in that store through the Cloudflare API. The initial `TEMP` value only allows the secret to be created. Every `01-worker-deploy` run retrieves the current Supabase service-role key through the Supabase Management API and replaces the value before deploying the Worker.
 
 ## 5. Supabase organization and project settings
 
