@@ -23,7 +23,7 @@ Postgres is the source of truth. Durable Objects provide tenant-scoped realtime 
 - **Cloudflare Secrets Store:** server-side Supabase service role key storage for protected Worker operations.
 - **Cloudflare Durable Objects:** organization-scoped WebSocket notification rooms.
 - **Supabase:** Postgres database, Auth API, and project management.
-- **Terraform:** Supabase project, initial database bootstrap execution, Hyperdrive, Worker, Secrets Store placeholder and binding metadata, and infrastructure outputs.
+- **Terraform:** Supabase project, initial database bootstrap execution, Hyperdrive, Worker, and infrastructure outputs.
 - **GitHub Actions:** Terraform provisioning and later application deployments.
 - **Node.js 26:** CI and local Worker test runtime.
 - **TypeScript:** Strictly type-checked Worker application and test code.
@@ -60,7 +60,7 @@ These scripts are bootstrap configuration, not migration history. Terraform exec
 ### `infra/terraform/`
 
 - `supabase.tf`: Supabase project, bootstrap SQL execution, API-key outputs, and project outputs.
-- `cloudflare.tf`: Hyperdrive, Worker, Secrets Store placeholder, and infrastructure outputs.
+- `cloudflare.tf`: Hyperdrive, Worker, and infrastructure outputs.
 - `state.tf`: Terraform state in Cloudflare R2 through the S3-compatible backend.
 - `variables.tf`: environment-provided identifiers and passwords.
 - `versions.tf`: Terraform and provider constraints.
@@ -73,7 +73,7 @@ The `00-terraform-apply` workflow performs one dependency-ordered apply:
 2. Run the initial setup SQL.
 3. Create Hyperdrive using `cloudflare_hyperdrive_role`.
 4. Create the Worker.
-5. Create the Secrets Store placeholder and Worker infrastructure. Wrangler deploys the application version and Durable Object migration.
+5. Create the Worker. The manually configured Secrets Store binding is updated and deployed by Wrangler.
 
 The Hyperdrive ID is kept in Terraform state. It is not copied to R2 as a separate artifact.
 
@@ -85,7 +85,7 @@ The `01-worker-deploy` workflow:
 2. Builds `apps/web` with `npm ci` and `npm run build`.
 3. Installs `apps/worker` dependencies with `npm ci`.
 4. Runs the strict Worker typecheck and TypeScript test suite.
-5. Reads the Worker name, Hyperdrive ID, Secrets Store IDs, and Supabase public settings from Terraform state.
+5. Reads the Worker name, Hyperdrive ID, and Supabase public settings from Terraform state; reads the manually configured Secrets Store IDs from GitHub environment variables.
 6. Retrieves the current Supabase service role key with `SUPABASE_ACCESS_TOKEN` and updates the existing Cloudflare Secrets Store secret.
 7. Renders the Hyperdrive and Secrets Store bindings into a temporary Wrangler configuration.
 8. Uses `wrangler deploy` to deploy the application code.

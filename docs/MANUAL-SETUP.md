@@ -32,12 +32,30 @@ Create a Cloudflare API token for the account. It must be able to manage the Clo
 
 - Hyperdrive configurations
 - Workers and Worker versions/deployments
+- Secrets Store secret updates and Worker bindings (`Account Secrets Store: Edit`)
 
 Add it as this GitHub environment secret:
 
 - `CLOUDFLARE_API_TOKEN`
 
-## 4. Supabase organization and project settings
+## 4. Cloudflare Secrets Store
+
+Create the Secrets Store and service-role secret manually in the Cloudflare account. Terraform does not create these resources because Cloudflare rejected the Terraform create request with `maximum_stores_exceeded`, even though no store was visible in the account dashboard.
+
+Create one Secrets Store, then create a secret with:
+
+- Name: `SUPABASE_SERVICE_ROLE_KEY`
+- Scope: `workers`
+- Initial value: `TEMP`
+
+Record the store ID and secret ID. Add them as variables in the GitHub Actions environment named `terraform`:
+
+- `CLOUDFLARE_SECRETS_STORE_ID`
+- `CLOUDFLARE_SERVICE_ROLE_SECRET_ID`
+
+The initial `TEMP` value only allows the secret to be created. Every `01-worker-deploy` run retrieves the current Supabase service-role key through the Supabase Management API and replaces the value before deploying the Worker.
+
+## 5. Supabase organization and project settings
 
 Create or select the Supabase organization that will own the project.
 
@@ -47,7 +65,7 @@ Add these GitHub environment variables:
 - `SUPABASE_PROJECT_NAME`
 - `SUPABASE_REGION`
 
-## 5. Supabase access and database passwords
+## 6. Supabase access and database passwords
 
 Create a Supabase personal access token with access for the Supabase Terraform provider and CLI. Add it as:
 
@@ -78,7 +96,7 @@ Add the result as:
 
 `SUPABASE_DB_PASSWORD` creates the Supabase project. `HYPERDRIVE_DB_PASSWORD` is applied by the setup SQL to `cloudflare_hyperdrive_role` and supplied to Hyperdrive.
 
-## 6. GitHub Actions environment
+## 7. GitHub Actions environment
 
 Create a GitHub Actions environment named `terraform`. Add all secrets and variables listed above to that environment.
 

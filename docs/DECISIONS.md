@@ -80,7 +80,7 @@ Terraform defines the Worker name and exposes it as an output. `apps/worker/wran
 
 ### 2026-10-31 — Keep Supabase service role key out of Terraform state
 
-Terraform creates the Cloudflare Secrets Store and an empty placeholder secret. The application deployment workflow retrieves the current Supabase service role key using `SUPABASE_ACCESS_TOKEN` and updates the existing secret with Wrangler before deployment. The key is not stored in Terraform/R2 state.
+The Cloudflare Secrets Store and `SUPABASE_SERVICE_ROLE_KEY` secret are created manually. Terraform could not create the Secrets Store: Cloudflare returned `maximum_stores_exceeded`, even though no store was visible in the account dashboard. The application deployment workflow retrieves the current Supabase service role key using `SUPABASE_ACCESS_TOKEN` and updates the existing secret with Wrangler before deployment. The key is not stored in Terraform/R2 state.
 
 ### 2026-10-27 — Strict TypeScript Worker and Node.js 26 test runtime
 
